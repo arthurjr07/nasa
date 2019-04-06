@@ -53,3 +53,8 @@
         </div>
     }
 }
+
+@if (!Model.PhotoGallery.Any() && !Model.PhotoAlbum.Any())
+{
+    <p>Application is still downloading the images from NASA. Please wait for few seconds and refresh the page to view the images</p>
+}

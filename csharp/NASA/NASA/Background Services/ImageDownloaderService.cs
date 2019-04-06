@@ -49,6 +49,13 @@ namespace NASA.BackgroundServices
                     foreach (var date in dates)
                     {
                         var earth_date = DateTime.Parse(date).ToString("yyyy-MM-dd");
+                        var albumFolder = $"{imagesFolder}/{earth_date}";
+                        if (Directory.Exists(albumFolder))
+                        {
+                            continue;
+                        }
+
+                        Directory.CreateDirectory(albumFolder);
                         var response = await _httpClient.GetAsync(
                             new Uri($"https://api.nasa.gov/mars-photos/api/v1/rovers/curiosity/photos?earth_date={earth_date}&api_key={_apiKey}"))
                             .ConfigureAwait(false);
@@ -62,11 +69,7 @@ namespace NASA.BackgroundServices
                                 var id = ((dynamic)photoObj).id;
                                 var url = ((dynamic)photoObj).img_src;
                                 var imageStream = await _httpClient.GetStreamAsync(url.Value).ConfigureAwait(false);
-                                var albumFolder = $"{imagesFolder}/{earth_date}";
-                                if(!Directory.Exists(albumFolder))
-                                {
-                                    Directory.CreateDirectory(albumFolder);
-                                }
+                                
                                 var filename = $"{albumFolder}/{id.Value}.jpg";
                                 using (var stream = new FileStream(filename, FileMode.Create))
                                 {

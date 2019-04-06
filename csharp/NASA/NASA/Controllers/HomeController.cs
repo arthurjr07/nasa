@@ -48,7 +48,7 @@ namespace NASA.Controllers
             foreach (string file in files)
             {
                 var caption = Path.GetFileNameWithoutExtension(file);
-                var url = $"./images/{Path.GetFileName(file)}";
+                var url = $"./images/{id}/{Path.GetFileName(file)}";
                 var photo = new Photo() { Caption = caption, URL = url };
                 photos.Add(photo);
             }
