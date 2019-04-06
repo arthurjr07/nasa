@@ -52,7 +52,14 @@ namespace NASA.BackgroundServices
                     var dates = File.ReadAllLines("img_dates.txt");
                     foreach (var date in dates)
                     {
-                        var earth_date = DateTime.Parse(date).ToString("yyyy-MM-dd");
+                        var validDate = DateTime.Today;
+                        var isValidDate = DateTime.TryParse(date, out validDate);
+                        if(!isValidDate)
+                        {
+                            continue;
+                        }
+
+                        var earth_date = validDate.ToString("yyyy-MM-dd");
                         var albumFolder = $"{imagesFolder}/{earth_date}";
                         if (Directory.Exists(albumFolder))
                         {
