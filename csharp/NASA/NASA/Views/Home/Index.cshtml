@@ -1,0 +1,55 @@
+﻿@model PhotoModel
+@{
+    ViewData["Title"] = "Home Page";
+}
+@if (Model.PhotoAlbum.Count > 0)
+{
+    foreach (var image in Model.PhotoAlbum)
+    {
+        <div class="col-md-2">
+            <div class="thumbnail">
+                <a href="@image.URL" class="thumbnail">
+                    <img src="./assets/folder.svg" alt="..." width="50">
+                </a>
+                <div class="caption">
+                    @*COMMENT: For the caption, we check if !null
+                        Display the caption if there is one, otherwise display a message stating so*@
+                    @if (image.Name != null)
+                    {
+                        <p>@image.Name </p>
+                    }
+                    else
+                    {
+                        <p>No caption available for this image</p>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+}
+
+@if (Model.PhotoGallery.Count > 0)
+{
+    foreach (var image in Model.PhotoGallery)
+    {
+        <div class="col-md-2">
+            <div class="thumbnail">
+                <a href="@image.URL" class="thumbnail">
+                    <img src="@image.URL" alt="..." width="600">
+                </a>
+                <div class="caption">
+                    @*COMMENT: For the caption, we check if !null
+                        Display the caption if there is one, otherwise display a message stating so*@
+                    @if (image.Caption != null)
+                    {
+                        <p>@image.Caption</p>
+                    }
+                    else
+                    {
+                        <p>No caption available for this image</p>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+}
