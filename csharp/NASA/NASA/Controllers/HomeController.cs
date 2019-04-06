@@ -10,13 +10,26 @@ using NASA.Models;
 
 namespace NASA.Controllers
 {
+    /// <summary>
+    /// Home Controller class
+    /// </summary>
     public class HomeController : Controller
     {
         private readonly IHostingEnvironment _environment;
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="environment"></param>
         public HomeController(IHostingEnvironment environment)
         {
             _environment = environment ?? throw new ArgumentNullException(nameof(environment));
         }
+
+        /// <summary>
+        /// Home page
+        /// </summary>
+        /// <returns></returns>
         public IActionResult Index()
         {
             var webRoot = _environment.WebRootPath;
@@ -37,6 +50,11 @@ namespace NASA.Controllers
             return View(model);
         }
 
+        /// <summary>
+        /// Display images on the album
+        /// </summary>
+        /// <param name="id">The album name</param>
+        /// <returns></returns>
         [Route("{id}")]
         public IActionResult Index(string id)
         {

@@ -8,6 +8,7 @@ using Microsoft.Extensions.Hosting;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Hosting = Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Logging;
 
 namespace NASA.BackgroundServices
 {
@@ -20,15 +21,18 @@ namespace NASA.BackgroundServices
         private readonly string _apiKey = "Oau7uZZxM7OcAeFFKqUpQovjDpHDN1xHRS3QZSGx";
         private readonly HttpClient _httpClient;
         private readonly Hosting.IHostingEnvironment _environment;
+        private readonly ILogger _logger;
 
         /// <summary>
         /// Constructor
         /// </summary>
         public ImageDownloaderService(HttpClient httpClient,
-            Hosting.IHostingEnvironment environment)
+            Hosting.IHostingEnvironment environment,
+            ILogger<ImageDownloaderService> logger)
         {
             _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
             _environment = environment ?? throw new ArgumentNullException(nameof(environment));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         /// <summary>
@@ -82,7 +86,7 @@ namespace NASA.BackgroundServices
                 }
                 catch(Exception e)
                 {
-                    //do nothing
+                    _logger.LogError(e.Message);
                 }
                 await Task.Delay(TimeSpan.FromMinutes(_noOfMinutesToWait), stoppingToken).ConfigureAwait(false);
             }
