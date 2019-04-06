@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using NASA.Domain;
 using NASA.Models;
 
 namespace NASA.Controllers
@@ -39,7 +40,7 @@ namespace NASA.Controllers
             try
             {
                 var webRoot = _environment.WebRootPath;
-                var imagesFolder = Path.Combine(webRoot, "images");
+                var imagesFolder = Path.Combine(webRoot, Constants.ImageDirectory);
                 var directories = Directory.GetDirectories(imagesFolder);
 
                 var albums = new List<Album>();
@@ -73,15 +74,15 @@ namespace NASA.Controllers
             try
             {
                 var webRoot = _environment.WebRootPath;
-                var imagesFolder = Path.Combine(webRoot, "images", id);
+                var imagesFolder = Path.Combine(webRoot, Constants.ImageDirectory, id);
                 var files = Directory.GetFiles(imagesFolder);
 
-                var photos = new List<Photo>();
+                var photos = new List<Image>();
                 foreach (string file in files)
                 {
                     var caption = Path.GetFileNameWithoutExtension(file);
-                    var url = $"./images/{id}/{Path.GetFileName(file)}";
-                    var photo = new Photo() { Caption = caption, URL = url };
+                    var url = $"./{Constants.ImageDirectory}/{id}/{Path.GetFileName(file)}";
+                    var photo = new Image() { Caption = caption, URL = url };
                     photos.Add(photo);
                 }
 

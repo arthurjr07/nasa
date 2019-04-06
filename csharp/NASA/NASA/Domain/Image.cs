@@ -1,14 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
-namespace NASA.Models
+﻿namespace NASA.Domain
 {
     /// <summary>
     /// Photo class
     /// </summary>
-    public class Photo
+    public class Image
     {
         /// <summary>
         /// Caption that will be displayed when image is not available

@@ -9,6 +9,8 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Hosting = Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Logging;
+using NASA.Domain;
+using NASA.Domain.RoverEntity;
 
 namespace NASA.BackgroundServices
 {
@@ -43,7 +45,7 @@ namespace NASA.BackgroundServices
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             var webRoot = _environment.WebRootPath;
-            var imagesFolder = Path.Combine(webRoot, "images");
+            var imagesFolder = Path.Combine(webRoot, Constants.ImageDirectory);
 
             while (!stoppingToken.IsCancellationRequested)
             {
@@ -73,15 +75,15 @@ namespace NASA.BackgroundServices
                         if (response.IsSuccessStatusCode)
                         {
                             var stringResponse = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-                            dynamic photoListObject = JObject.Parse(stringResponse);
-                            var photos = photoListObject.photos;
-                            foreach (var photoObj in photos)
+                            var rootObject = JsonConvert.DeserializeObject<RootObject>(stringResponse);
+                            var photos = rootObject.photos;
+                            foreach (var photo in photos)
                             {
-                                var id = ((dynamic)photoObj).id;
-                                var url = ((dynamic)photoObj).img_src;
-                                var imageStream = await _httpClient.GetStreamAsync(url.Value).ConfigureAwait(false);
+                                var id = photo.id.ToString();
+                                var url = photo.img_src;
+                                var imageStream = await _httpClient.GetStreamAsync(url).ConfigureAwait(false);
                                 
-                                var filename = $"{albumFolder}/{id.Value}.jpg";
+                                var filename = $"{albumFolder}/{id}.jpg";
                                 using (var stream = new FileStream(filename, FileMode.Create))
                                 {
                                     imageStream.CopyTo(stream);
