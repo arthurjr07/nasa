@@ -58,6 +58,7 @@ namespace NASA.BackgroundServices
                         var isValidDate = DateTime.TryParse(date, out validDate);
                         if(!isValidDate)
                         {
+                            _logger.LogWarning("Invalid date found in the text file", new[] { date });
                             continue;
                         }
 
@@ -65,6 +66,7 @@ namespace NASA.BackgroundServices
                         var albumFolder = $"{imagesFolder}/{earth_date}";
                         if (Directory.Exists(albumFolder))
                         {
+                            _logger.LogInformation($"Images for {earth_date} are already downloaded");
                             continue;
                         }
 
