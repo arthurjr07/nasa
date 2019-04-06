@@ -11,6 +11,6 @@ Set-ExecutionPolicy -ExecutionPolicy bypass
 
 The second solution is using asp.net core running on linux container. I used background services to download the images because downloading
 is a very slow process. So when you run the application, it will display a blank page initially because the images not yet downloaded. Just 
-click refresh (F5) and the album will start to appear. Click the album and the images will be displayed saved on that album.
+click refresh (F5) and the album will start to appear. Click the album and the images on that album will be displayed.
 
 
