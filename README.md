@@ -3,7 +3,7 @@ earth images
 
 There are 2 solutions in this repository. 
 
-The first solution is using powershell scripts that downloads the images from NASA API 
+The first solution is using powershell script that downloads the images from NASA API 
 and saved it to c:\temp folder. Before running the script, be sure the img_dates.txt and the img_downloader.ps1 is on the same folder.
 Set the execution policy also to bypass by running the script below
 
