@@ -5,6 +5,7 @@ using Moq;
 using NASA.BackgroundServices;
 using NUnit.Framework;
 using System;
+using System.IO.Abstractions;
 using System.Net.Http;
 
 
@@ -21,12 +22,15 @@ namespace Tests
                 var mockHttpClient = new Mock<HttpClient>(MockBehavior.Strict);
                 var mockEnvironment = new Mock<IHostingEnvironment>(MockBehavior.Strict);
                 var mockLogger = new Mock<ILogger<ImageDownloaderService>>(MockBehavior.Strict);
+                var mockFileSystem = new Mock<IFileSystem>(MockBehavior.Strict);
+
 
                 var target = new Func<ImageDownloaderService>(() =>
                  new ImageDownloaderService(
                      null,
                      mockEnvironment.Object,
-                     mockLogger.Object
+                     mockLogger.Object,
+                     mockFileSystem.Object
                      ));
 
                 //Act
@@ -43,12 +47,14 @@ namespace Tests
                 var mockHttpClient = new Mock<HttpClient>(MockBehavior.Strict);
                 var mockEnvironment = new Mock<IHostingEnvironment>(MockBehavior.Strict);
                 var mockLogger = new Mock<ILogger<ImageDownloaderService>>(MockBehavior.Strict);
+                var mockFileSystem = new Mock<IFileSystem>(MockBehavior.Strict);
 
                 var target = new Func<ImageDownloaderService>(() =>
                  new ImageDownloaderService(
                      mockHttpClient.Object,
                      null,
-                     mockLogger.Object
+                     mockLogger.Object,
+                     mockFileSystem.Object
                      ));
 
                 //Act
@@ -65,12 +71,14 @@ namespace Tests
                 var mockHttpClient = new Mock<HttpClient>(MockBehavior.Strict);
                 var mockEnvironment = new Mock<IHostingEnvironment>(MockBehavior.Strict);
                 var mockLogger = new Mock<ILogger<ImageDownloaderService>>(MockBehavior.Strict);
+                var mockFileSystem = new Mock<IFileSystem>(MockBehavior.Strict);
 
                 var target = new Func<ImageDownloaderService>(() =>
                  new ImageDownloaderService(
                      mockHttpClient.Object,
                      mockEnvironment.Object,
-                     null
+                     null,
+                     mockFileSystem.Object
                      ));
 
                 //Act

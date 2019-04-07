@@ -11,6 +11,7 @@ using Hosting = Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Logging;
 using NASA.Domain;
 using NASA.Domain.RoverEntity;
+using System.IO.Abstractions;
 
 namespace NASA.BackgroundServices
 {
@@ -24,17 +25,20 @@ namespace NASA.BackgroundServices
         private readonly HttpClient _httpClient;
         private readonly Hosting.IHostingEnvironment _environment;
         private readonly ILogger _logger;
+        private readonly IFileSystem _fileSystem;
 
         /// <summary>
         /// Constructor
         /// </summary>
         public ImageDownloaderService(HttpClient httpClient,
             Hosting.IHostingEnvironment environment,
-            ILogger<ImageDownloaderService> logger)
+            ILogger<ImageDownloaderService> logger,
+            IFileSystem fileSystem)
         {
             _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
             _environment = environment ?? throw new ArgumentNullException(nameof(environment));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _fileSystem = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
         }
 
         /// <summary>
@@ -45,13 +49,13 @@ namespace NASA.BackgroundServices
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             var webRoot = _environment.WebRootPath;
-            var imagesFolder = Path.Combine(webRoot, Constants.ImageDirectory);
+            var imagesFolder = _fileSystem.Path.Combine(webRoot, Constants.ImageDirectory);
 
             while (!stoppingToken.IsCancellationRequested)
             {
                 try
                 {
-                    var dates = File.ReadAllLines("img_dates.txt");
+                    var dates = _fileSystem.File.ReadAllLines("img_dates.txt");
                     foreach (var date in dates)
                     {
                         var validDate = DateTime.Today;
@@ -64,13 +68,15 @@ namespace NASA.BackgroundServices
 
                         var earth_date = validDate.ToString("yyyy-MM-dd");
                         var albumFolder = $"{imagesFolder}/{earth_date}";
-                        if (Directory.Exists(albumFolder))
+                        if (_fileSystem.Directory.Exists(albumFolder))
                         {
                             _logger.LogInformation($"Images for {earth_date} are already downloaded");
                             continue;
                         }
 
-                        Directory.CreateDirectory(albumFolder);
+                        _fileSystem.Directory.CreateDirectory(albumFolder);
+
+                        //TODO: Move this functionality to Rover Service class
                         var response = await _httpClient.GetAsync(
                             new Uri($"https://api.nasa.gov/mars-photos/api/v1/rovers/curiosity/photos?earth_date={earth_date}&api_key={_apiKey}"))
                             .ConfigureAwait(false);
@@ -86,7 +92,7 @@ namespace NASA.BackgroundServices
                                 var imageStream = await _httpClient.GetStreamAsync(url).ConfigureAwait(false);
                                 
                                 var filename = $"{albumFolder}/{id}.jpg";
-                                using (var stream = new FileStream(filename, FileMode.Create))
+                                using (var stream = _fileSystem.FileStream.Create(filename, FileMode.Create))
                                 {
                                     imageStream.CopyTo(stream);
                                 }

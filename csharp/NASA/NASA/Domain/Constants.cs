@@ -5,6 +5,9 @@ using System.Threading.Tasks;
 
 namespace NASA.Domain
 {
+    /// <summary>
+    /// Class for string contants
+    /// </summary>
     public class Constants
     {
         public const string ImageDirectory = "images";
