@@ -28,12 +28,22 @@ namespace NASA.Insfrastructures.Services
             _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
         }
 
+        /// <summary>
+        /// Download the image on the specified url.
+        /// </summary>
+        /// <param name="url">The url</param>
+        /// <returns></returns>
         public async Task<Stream> DownloadImage(string url)
         {
             var imageStream = await _httpClient.GetStreamAsync(url).ConfigureAwait(false);
             return imageStream;
         }
 
+        /// <summary>
+        /// Retrieve all the images on the specified date.
+        /// </summary>
+        /// <param name="date">The date.</param>
+        /// <returns></returns>
         public async Task<IEnumerable<Image>> GetImages(DateTime date)
         {
             if(date > DateTime.Today )
