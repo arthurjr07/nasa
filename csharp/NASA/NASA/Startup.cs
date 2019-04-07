@@ -12,6 +12,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using NASA.BackgroundServices;
+using NASA.Insfrastructures.Services;
 
 namespace NASA
 {
@@ -39,6 +40,7 @@ namespace NASA
             services.AddTransient<HttpClient>(c => new HttpClient());
             services.AddSingleton<IHostedService, ImageDownloaderService>();
             services.AddTransient<IFileSystem, FileSystem>();
+            services.AddTransient<IRoverService, RoverService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

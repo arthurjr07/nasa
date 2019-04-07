@@ -12,6 +12,7 @@ using Microsoft.Extensions.Logging;
 using NASA.Domain;
 using NASA.Domain.RoverEntity;
 using System.IO.Abstractions;
+using NASA.Insfrastructures.Services;
 
 namespace NASA.BackgroundServices
 {
@@ -21,21 +22,22 @@ namespace NASA.BackgroundServices
     public class ImageDownloaderService : BackgroundService
     {
         private readonly int _noOfMinutesToWait = 60;
-        private readonly string _apiKey = "Oau7uZZxM7OcAeFFKqUpQovjDpHDN1xHRS3QZSGx";
-        private readonly HttpClient _httpClient;
+        private readonly string _dateConfigFile = "img_dates.txt";
         private readonly Hosting.IHostingEnvironment _environment;
+
         private readonly ILogger _logger;
         private readonly IFileSystem _fileSystem;
+        private readonly IRoverService _roverService;
 
         /// <summary>
         /// Constructor
         /// </summary>
-        public ImageDownloaderService(HttpClient httpClient,
+        public ImageDownloaderService(IRoverService roverService,
             Hosting.IHostingEnvironment environment,
             ILogger<ImageDownloaderService> logger,
             IFileSystem fileSystem)
         {
-            _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
+            _roverService = roverService ?? throw new ArgumentNullException(nameof(roverService));
             _environment = environment ?? throw new ArgumentNullException(nameof(environment));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _fileSystem = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
@@ -55,7 +57,13 @@ namespace NASA.BackgroundServices
             {
                 try
                 {
-                    var dates = _fileSystem.File.ReadAllLines("img_dates.txt");
+                    if(!_fileSystem.File.Exists(_dateConfigFile))
+                    {
+                        _logger.LogWarning("File does not exists.", new[] { _dateConfigFile });
+                        continue;
+                    }
+
+                    var dates = _fileSystem.File.ReadAllLines(_dateConfigFile);
                     foreach (var date in dates)
                     {
                         var validDate = DateTime.Today;
@@ -76,29 +84,17 @@ namespace NASA.BackgroundServices
 
                         _fileSystem.Directory.CreateDirectory(albumFolder);
 
-                        //TODO: Move this functionality to Rover Service class
-                        var response = await _httpClient.GetAsync(
-                            new Uri($"https://api.nasa.gov/mars-photos/api/v1/rovers/curiosity/photos?earth_date={earth_date}&api_key={_apiKey}"))
-                            .ConfigureAwait(false);
-                        if (response.IsSuccessStatusCode)
+                        var images = await _roverService.GetImages(validDate).ConfigureAwait(false);
+                        foreach(var image in images)
                         {
-                            var stringResponse = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-                            var rootObject = JsonConvert.DeserializeObject<RootObject>(stringResponse);
-                            var photos = rootObject.photos;
-                            foreach (var photo in photos)
+                            var imageStream = await _roverService.DownloadImage(image.URL).ConfigureAwait(false);
+                            var filename = $"{albumFolder}/{image.Caption}.jpg";
+                            using (var stream = _fileSystem.FileStream.Create(filename, FileMode.Create))
                             {
-                                var id = photo.id.ToString();
-                                var url = photo.img_src;
-                                var imageStream = await _httpClient.GetStreamAsync(url).ConfigureAwait(false);
-                                
-                                var filename = $"{albumFolder}/{id}.jpg";
-                                using (var stream = _fileSystem.FileStream.Create(filename, FileMode.Create))
-                                {
-                                    imageStream.CopyTo(stream);
-                                }
+                                imageStream.CopyTo(stream);
                             }
-
                         }
+                        
                     }
                 }
                 catch(Exception e)

@@ -1,6 +1,11 @@
-﻿using System;
+﻿using NASA.Domain;
+using NASA.Domain.RoverEntity;
+using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Threading.Tasks;
 
 namespace NASA.Insfrastructures.Services
@@ -8,10 +13,54 @@ namespace NASA.Insfrastructures.Services
     /// <summary>
     /// Rover Service class for accessing the NASA API
     /// </summary>
-    public class RoverService
+    public class RoverService : IRoverService 
     {
-        //Move all rover related functionality here.
-        //Get images Url by date
-        //Download image
+
+        private readonly HttpClient _httpClient;
+        private readonly string _apiKey = "Oau7uZZxM7OcAeFFKqUpQovjDpHDN1xHRS3QZSGx";
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="_httpClient"></param>
+        public RoverService(HttpClient httpClient)
+        {
+            _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
+        }
+
+        public async Task<Stream> DownloadImage(string url)
+        {
+            var imageStream = await _httpClient.GetStreamAsync(url).ConfigureAwait(false);
+            return imageStream;
+        }
+
+        public async Task<IEnumerable<Image>> GetImages(DateTime date)
+        {
+            if(date > DateTime.Today )
+            {
+                throw new ApplicationException("Date should not be greater than date today");
+            }
+
+            var images = new List<Image>();
+            var earth_date = date.ToString("yyyy-MM-dd");
+            var response = await _httpClient.GetAsync(
+                            new Uri($"https://api.nasa.gov/mars-photos/api/v1/rovers/curiosity/photos?earth_date={earth_date}&api_key={_apiKey}"))
+                            .ConfigureAwait(false);
+            if (response.IsSuccessStatusCode)
+            {
+                var stringResponse = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+                var rootObject = JsonConvert.DeserializeObject<RootObject>(stringResponse);
+                var photos = rootObject.photos;
+                foreach (var photo in photos)
+                {
+                    var id = photo.id.ToString();
+                    var url = photo.img_src;
+                    var image = new Image() { Caption = id, URL = url };
+                    images.Add(image);
+                }
+            }
+
+            return images;
+        }
     }
 }
